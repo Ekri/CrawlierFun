@@ -1,7 +1,6 @@
 package main
 
 import (
-	"crypto/tls"
 	"flag"
 	"fmt"
 	"github.com/jackdanger/collectlinks"
@@ -33,17 +32,17 @@ func main() {
 func enqueue(uri string, queue chan string) {
 	fmt.Println("fetching", uri)
 	visited[uri] = true
-	tlsConfig := &tls.Config{
-		InsecureSkipVerify: true,
+
+	client := &http.Client{}
+
+	req, err := http.NewRequest("GET", uri, nil)
+	if err != nil {
+		return
 	}
 
-	transport := &http.Transport{
-		TLSClientConfig: tlsConfig,
-	}
+	req.Header.Set("User-Agent", "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)")
 
-	client := http.Client{Transport: transport}
-
-	resp, err := client.Get(uri)
+	resp, err := client.Do(req)
 	if err != nil {
 		return
 	}
